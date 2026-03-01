@@ -12,7 +12,7 @@ const Product = () => {
 
     const loadItems = async () => {
         try {
-            const response = await api.get('/product/product/');
+            const response = await api.get('/product/');
             setItems(response.data);
         } catch (err) {
             console.error('Error loading products:', err);
@@ -31,7 +31,7 @@ const Product = () => {
     const addItem = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/product/product/', newItem);
+            await api.post('/product/', newItem);
             setNewItem({ name: '', price: '', category: '', description: '' });
             loadItems();
         } catch (err) {
@@ -41,7 +41,7 @@ const Product = () => {
 
     const deleteItem = async (id) => {
         try {
-            await api.delete(`/product/product/${id}/`);
+            await api.delete(`/product/${id}/`);
             loadItems();
         } catch (err) {
             console.error('Error deleting product:', err);

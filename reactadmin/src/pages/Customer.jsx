@@ -13,7 +13,7 @@ const Customer = () => {
 
     const loadItems = async () => {
         try {
-            const response = await api.get('/customer/customer/');
+            const response = await api.get('/customer/');
             setItems(response.data);
         } catch (err) {
             console.error('Error loading customers:', err);
@@ -32,7 +32,7 @@ const Customer = () => {
     const addItem = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/customer/customer/', newItem);
+            await api.post('/customer/', newItem);
             setNewItem({ name: '', email: '', phone: '', address: '', password: '' });
             loadItems();
         } catch (err) {
@@ -42,7 +42,7 @@ const Customer = () => {
 
     const deleteItem = async (id) => {
         try {
-            await api.delete(`/customer/customer/${id}/`);
+            await api.delete(`/customer/${id}/`);
             loadItems();
         } catch (err) {
             console.error('Error deleting customer:', err);

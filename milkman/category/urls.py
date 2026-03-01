@@ -18,6 +18,6 @@ from django.urls import path
 from .views import CategoryViewSet
 
 urlpatterns = [
-    path('category/', CategoryViewSet.as_view(), name='category-list'),
-    path('category/<int:pk>/', CategoryViewSet.as_view(), name='category-detail'),
+    path('', CategoryViewSet.as_view(), name='category-list'),
+    path('<int:pk>/', CategoryViewSet.as_view(), name='category-detail'),
 ]

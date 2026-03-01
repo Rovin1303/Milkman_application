@@ -1,14 +1,14 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from .models import Category
 from .serializers import CategorySerializer
 from staff.auth import StaffTokenAuthentication
 
 class CategoryViewSet(APIView):
-    authentication_classes = [StaffTokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    authentication_classes = []
+    permission_classes = [AllowAny]
 
     def get(self, request, format=None):
         categories = Category.objects.all()

@@ -10,7 +10,7 @@ const Category = () => {
 
     const loadItems = async () => {
         try {
-            const response = await api.get('/category/category/');
+            const response = await api.get('/category/');
             setItems(response.data);
         } catch (err) {
             console.error('Error loading categories:', err);
@@ -29,7 +29,7 @@ const Category = () => {
     const addItem = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/category/category/', newItem);
+            await api.post('/category/', newItem);
             setNewItem({ name: '', description: '' });
             loadItems();
         } catch (err) {
@@ -39,7 +39,7 @@ const Category = () => {
 
     const deleteItem = async (id) => {
         try {
-            await api.delete(`/category/category/${id}/`);
+            await api.delete(`/category/${id}/`);
             loadItems();
         } catch (err) {
             console.error('Error deleting category:', err);
