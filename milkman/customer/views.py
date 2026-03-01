@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Customer
 from .serializers import CustomerSerializer
-from staff.auth import StaffTokenAuthentication
+from staff.auth import StaffTokenAuthentication, create_token
 
 class CustomerViewSet(APIView):
     authentication_classes = [StaffTokenAuthentication]
@@ -34,3 +34,29 @@ class CustomerViewSet(APIView):
         customer = Customer.objects.get(pk=pk)
         customer.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class CustomerLoginView(APIView):
+    permission_classes = []
+    authentication_classes = []
+
+    def post(self, request, format=None):
+        email = request.data.get("email")
+        password = request.data.get("password")
+
+        if not email or not password:
+            return Response({"error": "Email and password are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            customer = Customer.objects.get(email=email)
+        except Customer.DoesNotExist:
+            return Response({"error": "Invalid email or password."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if not customer.is_active:
+            return Response({"error": "Account is inactive."}, status=status.HTTP_403_FORBIDDEN)
+
+        from django.contrib.auth.hashers import check_password
+        if not check_password(password, customer.password):
+            return Response({"error": "Invalid email or password."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        token = create_token(customer)
+        return Response({"token": token})
