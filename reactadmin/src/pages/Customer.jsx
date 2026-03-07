@@ -14,6 +14,7 @@ const Customer = () => {
     const loadItems = async () => {
         try {
             const response = await api.get('/customer/');
+            console.log('customer response', response.data);
             setItems(response.data);
         } catch (err) {
             console.error('Error loading customers:', err);
@@ -50,14 +51,15 @@ const Customer = () => {
     };
 
     return (
-        <div className="mt-4">
-            <h2>Customer Management</h2>
-            <div className="card mb-4 mt-3">
+        <div className="admin-page mt-4">
+            <h2 className="admin-page-title">Customer Management</h2>
+            <p className="admin-page-subtitle">Manage customer profiles and account records.</p>
+            <div className="card mb-4 mt-3 admin-panel">
                 <div className="card-body">
                     <h5 className="card-title">Add New Customer</h5>
-                    <form onSubmit={addItem} className="row g-3">
+                    <form onSubmit={addItem} className="row g-3 admin-form">
                         <div className="col-md-3">
-                            <label className="form-label">NAME</label>
+                            <label className="form-label admin-form-label">NAME</label>
                             <input
                                 type="text"
                                 className="form-control"
@@ -68,7 +70,7 @@ const Customer = () => {
                             />
                         </div>
                         <div className="col-md-3">
-                            <label className="form-label">EMAIL</label>
+                            <label className="form-label admin-form-label">EMAIL</label>
                             <input
                                 type="email"
                                 className="form-control"
@@ -79,7 +81,7 @@ const Customer = () => {
                             />
                         </div>
                         <div className="col-md-3">
-                            <label className="form-label">PHONE</label>
+                            <label className="form-label admin-form-label">PHONE</label>
                             <input
                                 type="text"
                                 className="form-control"
@@ -90,7 +92,7 @@ const Customer = () => {
                             />
                         </div>
                         <div className="col-md-3">
-                            <label className="form-label">ADDRESS</label>
+                            <label className="form-label admin-form-label">ADDRESS</label>
                             <input
                                 type="text"
                                 className="form-control"
@@ -101,7 +103,7 @@ const Customer = () => {
                             />
                         </div>
                         <div className="col-md-3">
-                            <label className="form-label">PASSWORD</label>
+                            <label className="form-label admin-form-label">PASSWORD</label>
                             <input
                                 type="password"
                                 className="form-control"
@@ -112,35 +114,37 @@ const Customer = () => {
                             />
                         </div>
                         <div className="col-12">
-                            <button type="submit" className="btn btn-success">Add Customer</button>
+                            <button type="submit" className="btn btn-success admin-action-btn">Add Customer</button>
                         </div>
                     </form>
                 </div>
             </div>
-            <table className="table table-striped">
-                <thead>
-                    <tr>
-                        <th>NAME</th>
-                        <th>EMAIL</th>
-                        <th>PHONE</th>
-                        <th>ADDRESS</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {items.map(item => (
-                        <tr key={item.id}>
-                            <td>{item.name}</td>
-                            <td>{item.email}</td>
-                            <td>{item.phone}</td>
-                            <td>{item.address}</td>
-                            <td>
-                                <button className="btn btn-danger btn-sm" onClick={() => deleteItem(item.id)}>Delete</button>
-                            </td>
+            <div className="admin-table-wrap">
+                <table className="table table-striped table-hover align-middle admin-table">
+                    <thead>
+                        <tr>
+                            <th>NAME</th>
+                            <th>EMAIL</th>
+                            <th>PHONE</th>
+                            <th>ADDRESS</th>
+                            <th>Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {items.map(item => (
+                            <tr key={item.id}>
+                                <td>{item.name}</td>
+                                <td>{item.email}</td>
+                                <td>{item.phone}</td>
+                                <td>{item.address}</td>
+                                <td>
+                                    <button className="btn btn-danger btn-sm admin-action-btn" onClick={() => deleteItem(item.id)}>Delete</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

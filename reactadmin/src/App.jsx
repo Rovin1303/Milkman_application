@@ -15,6 +15,8 @@ const PrivateRoute = ({ children }) => {
 };
 
 function App() {
+    const isLoggedIn = !!localStorage.getItem('staffToken');
+
     return (
         <Router>
             <Layout>
@@ -25,7 +27,8 @@ function App() {
                     <Route path="/category" element={<PrivateRoute><Category /></PrivateRoute>} />
                     <Route path="/product" element={<PrivateRoute><Product /></PrivateRoute>} />
                     <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
-                    <Route path="/" element={<Navigate to="/staff" />} />
+                    <Route path="/" element={<Navigate to={isLoggedIn ? '/staff' : '/login'} replace />} />
+                    <Route path="*" element={<Navigate to={isLoggedIn ? "/staff" : "/login"} replace />} />
                 </Routes>
             </Layout>
         </Router>

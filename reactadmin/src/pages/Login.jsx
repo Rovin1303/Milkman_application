@@ -29,8 +29,8 @@ const Login = () => {
     };
 
     return (
-        <div className="container" style={{ maxWidth: '400px', marginTop: '100px' }}>
-            <div className="card shadow">
+        <div className="container admin-login-page">
+            <div className="card shadow admin-login-card">
                 <div className="card-body">
                     <h3 className="card-title text-center mb-4">Staff Login</h3>
                     <form onSubmit={handleLogin}>

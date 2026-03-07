@@ -13,6 +13,7 @@ const Product = () => {
     const loadItems = async () => {
         try {
             const response = await api.get('/product/');
+            console.log('product response', response.data);
             setItems(response.data);
         } catch (err) {
             console.error('Error loading products:', err);
@@ -49,14 +50,15 @@ const Product = () => {
     };
 
     return (
-        <div className="mt-4">
-            <h2>Product Management</h2>
-            <div className="card mb-4 mt-3">
+        <div className="admin-page mt-4">
+            <h2 className="admin-page-title">Product Management</h2>
+            <p className="admin-page-subtitle">Maintain pricing, categories, and product metadata.</p>
+            <div className="card mb-4 mt-3 admin-panel">
                 <div className="card-body">
                     <h5 className="card-title">Add New Product</h5>
-                    <form onSubmit={addItem} className="row g-3">
+                    <form onSubmit={addItem} className="row g-3 admin-form">
                         <div className="col-md-3">
-                            <label className="form-label">NAME</label>
+                            <label className="form-label admin-form-label">NAME</label>
                             <input
                                 type="text"
                                 className="form-control"
@@ -67,7 +69,7 @@ const Product = () => {
                             />
                         </div>
                         <div className="col-md-3">
-                            <label className="form-label">PRICE</label>
+                            <label className="form-label admin-form-label">PRICE</label>
                             <input
                                 type="number"
                                 step="0.01"
@@ -79,7 +81,7 @@ const Product = () => {
                             />
                         </div>
                         <div className="col-md-3">
-                            <label className="form-label">CATEGORY ID</label>
+                            <label className="form-label admin-form-label">CATEGORY ID</label>
                             <input
                                 type="number"
                                 className="form-control"
@@ -90,7 +92,7 @@ const Product = () => {
                             />
                         </div>
                         <div className="col-md-3">
-                            <label className="form-label">DESCRIPTION</label>
+                            <label className="form-label admin-form-label">DESCRIPTION</label>
                             <input
                                 type="text"
                                 className="form-control"
@@ -100,35 +102,37 @@ const Product = () => {
                             />
                         </div>
                         <div className="col-12">
-                            <button type="submit" className="btn btn-success">Add Product</button>
+                            <button type="submit" className="btn btn-success admin-action-btn">Add Product</button>
                         </div>
                     </form>
                 </div>
             </div>
-            <table className="table table-striped">
-                <thead>
-                    <tr>
-                        <th>NAME</th>
-                        <th>PRICE</th>
-                        <th>CATEGORY</th>
-                        <th>DESCRIPTION</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {items.map(item => (
-                        <tr key={item.id}>
-                            <td>{item.name}</td>
-                            <td>${parseFloat(item.price).toFixed(2)}</td>
-                            <td>{item.category}</td>
-                            <td>{item.description}</td>
-                            <td>
-                                <button className="btn btn-danger btn-sm" onClick={() => deleteItem(item.id)}>Delete</button>
-                            </td>
+            <div className="admin-table-wrap">
+                <table className="table table-striped table-hover align-middle admin-table">
+                    <thead>
+                        <tr>
+                            <th>NAME</th>
+                            <th>PRICE</th>
+                            <th>CATEGORY</th>
+                            <th>DESCRIPTION</th>
+                            <th>Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {items.map(item => (
+                            <tr key={item.id}>
+                                <td>{item.name}</td>
+                                <td>${parseFloat(item.price).toFixed(2)}</td>
+                                <td>{item.category}</td>
+                                <td>{item.description}</td>
+                                <td>
+                                    <button className="btn btn-danger btn-sm admin-action-btn" onClick={() => deleteItem(item.id)}>Delete</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

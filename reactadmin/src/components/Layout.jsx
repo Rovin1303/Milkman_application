@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 
 const Layout = ({ children }) => {
     const navigate = useNavigate();
@@ -15,30 +15,30 @@ const Layout = ({ children }) => {
     if (!isLoggedIn) return <>{children}</>;
 
     return (
-        <div>
-            <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div className="admin-shell">
+            <nav className="navbar navbar-expand-lg admin-navbar fixed-top">
                 <div className="container">
-                    <Link className="navbar-brand" to="/">Milkman Admin</Link>
-                    <div className="collapse navbar-collapse">
+                    <Link className="navbar-brand admin-brand" to="/">Milkman Admin</Link>
+                    <div className="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center w-100 gap-2">
                         <ul className="navbar-nav me-auto">
-                            <li className="nav-item"><Link className="nav-link" to="/staff">Staff</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/customer">Customers</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/category">Categories</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/product">Products</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/subscription">Subscriptions</Link></li>
+                            <li className="nav-item"><NavLink className="nav-link admin-nav-item" to="/staff">Staff</NavLink></li>
+                            <li className="nav-item"><NavLink className="nav-link admin-nav-item" to="/customer">Customers</NavLink></li>
+                            <li className="nav-item"><NavLink className="nav-link admin-nav-item" to="/category">Categories</NavLink></li>
+                            <li className="nav-item"><NavLink className="nav-link admin-nav-item" to="/product">Products</NavLink></li>
+                            <li className="nav-item"><NavLink className="nav-link admin-nav-item" to="/subscription">Subscriptions</NavLink></li>
                         </ul>
                         <ul className="navbar-nav ms-auto">
                             <li className="nav-item">
-                                <span className="nav-link text-light">Welcome, {user.email}</span>
+                                <span className="admin-user-chip">Welcome, {user.email}</span>
                             </li>
                             <li className="nav-item">
-                                <button className="btn btn-link nav-link" onClick={handleLogout}>Logout</button>
+                                <button className="btn btn-link nav-link admin-logout-btn" onClick={handleLogout}>Logout</button>
                             </li>
                         </ul>
                     </div>
                 </div>
             </nav>
-            <div className="container" style={{ marginTop: '80px' }}>
+            <div className="container admin-content">
                 {children}
             </div>
         </div>

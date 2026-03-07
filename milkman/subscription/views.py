@@ -7,11 +7,17 @@ from .serializers import SubscriptionSerializer
 from staff.auth import StaffTokenAuthentication
 
 class SubscriptionViewSet(APIView):
-    authentication_classes = [StaffTokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # allow customers to hit this endpoint, staff may still use it
+    authentication_classes = []
+    permission_classes = []
 
     def get(self, request, format=None):
-        subscriptions = Subscription.objects.all()
+        # optionally filter by customer id passed as query parameter
+        customer_id = request.query_params.get("customer")
+        if customer_id:
+            subscriptions = Subscription.objects.filter(customer_id=customer_id)
+        else:
+            subscriptions = Subscription.objects.all()
         serializer = SubscriptionSerializer(subscriptions, many=True)
         return Response(serializer.data)
 
@@ -25,6 +31,15 @@ class SubscriptionViewSet(APIView):
     def put(self, request, pk, format=None):
         subscription = Subscription.objects.get(pk=pk)
         serializer = SubscriptionSerializer(subscription, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # partial update can be used for pause/resume toggling
+    def patch(self, request, pk, format=None):
+        subscription = Subscription.objects.get(pk=pk)
+        serializer = SubscriptionSerializer(subscription, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

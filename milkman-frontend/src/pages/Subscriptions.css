@@ -1,0 +1,138 @@
+.subscriptions-page {
+  background: linear-gradient(145deg, #f8f9fa 0%, #e8eeff 52%, #f5f8ff 100%);
+  min-height: 100vh;
+  padding: 40px 20px;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+.subscriptions-page .container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.subscriptions-page h2 {
+  color: #004e89;
+  margin-bottom: 30px;
+  font-weight: 700;
+  font-size: 32px;
+  letter-spacing: -0.5px;
+}
+
+.table-wrapper {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 14px 30px rgba(0, 23, 51, 0.11);
+  overflow-x: auto;
+  margin-bottom: 30px;
+  border: 1px solid #e5ecff;
+}
+
+.subscriptions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.subscriptions-table thead {
+  background: linear-gradient(135deg, #004e89 0%, #003d6b 100%);
+  border-bottom: 3px solid #ff6b35;
+}
+
+.subscriptions-table th {
+  padding: 18px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.subscriptions-table tbody tr {
+  border-bottom: 1px solid #e8eeff;
+  transition: all 0.3s ease;
+}
+
+.subscriptions-table tbody tr:hover {
+  background-color: #f0f3ff;
+  box-shadow: inset 0 0 10px rgba(0, 78, 137, 0.05);
+}
+
+.subscriptions-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.subscriptions-table td {
+  padding: 16px;
+  color: #333;
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%);
+  color: white;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+}
+
+.delete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
+}
+
+.delete-btn:active {
+  transform: translateY(0);
+}
+
+.total-section {
+  background: linear-gradient(135deg, #1dd1a1 0%, #16a085 100%);
+  padding: 24px;
+  border-radius: 12px;
+  text-align: right;
+  font-size: 18px;
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(29, 209, 161, 0.2);
+}
+
+.subscriptions-page p {
+  text-align: center;
+  color: #666;
+  margin-top: 40px;
+  font-size: 16px;
+  padding: 40px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.action-cell {
+  min-width: 130px;
+}
+
+@media (max-width: 780px) {
+  .subscriptions-page {
+    padding: 24px 8px;
+  }
+
+  .subscriptions-page h2 {
+    font-size: 1.5rem;
+  }
+
+  .subscriptions-table {
+    font-size: 13px;
+  }
+
+  .subscriptions-table th,
+  .subscriptions-table td {
+    padding: 11px 10px;
+  }
+}

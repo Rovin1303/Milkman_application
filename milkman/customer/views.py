@@ -1,62 +1,83 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+
 from .models import Customer
 from .serializers import CustomerSerializer
-from staff.auth import StaffTokenAuthentication, create_token
+from staff.auth import create_token
+
+
+# ==============================
+# CUSTOMER CRUD VIEW
+# ==============================
 
 class CustomerViewSet(APIView):
-    authentication_classes = [StaffTokenAuthentication]
-    permission_classes = [IsAuthenticated]
 
-    def get(self, request, format=None):
+    # 🔥 No authentication
+    authentication_classes = []
+    permission_classes = []
+
+    # ✅ GET - List all customers
+    def get(self, request):
         customers = Customer.objects.all()
         serializer = CustomerSerializer(customers, many=True)
         return Response(serializer.data)
 
-    def post(self, request, format=None):
+    # ✅ POST - Register customer
+    def post(self, request):
         serializer = CustomerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
 
-    def put(self, request, pk, format=None):
-        customer = Customer.objects.get(pk=pk)
+    # ✅ PUT - Update customer
+    def put(self, request, pk):
+        customer = get_object_or_404(Customer, pk=pk)
         serializer = CustomerSerializer(customer, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=400)
 
-    def delete(self, request, pk, format=None):
-        customer = Customer.objects.get(pk=pk)
+    # ✅ DELETE
+    def delete(self, request, pk):
+        customer = get_object_or_404(Customer, pk=pk)
         customer.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Deleted"}, status=204)
+
+
+# ==============================
+# CUSTOMER LOGIN VIEW
+# ==============================
 
 class CustomerLoginView(APIView):
-    permission_classes = []
-    authentication_classes = []
 
-    def post(self, request, format=None):
-        email = request.data.get("email")
-        password = request.data.get("password")
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+
+        email = request.data.get("email", "").strip()
+        password = request.data.get("password", "").strip()
 
         if not email or not password:
-            return Response({"error": "Email and password are required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Email and password required"}, status=400)
 
-        try:
-            customer = Customer.objects.get(email=email)
-        except Customer.DoesNotExist:
-            return Response({"error": "Invalid email or password."}, status=status.HTTP_401_UNAUTHORIZED)
+        customer = Customer.objects.filter(email__iexact=email).first()
 
-        if not customer.is_active:
-            return Response({"error": "Account is inactive."}, status=status.HTTP_403_FORBIDDEN)
+        if not customer:
+            return Response({"error": "Invalid email or password"}, status=401)
 
-        from django.contrib.auth.hashers import check_password
-        if not check_password(password, customer.password):
-            return Response({"error": "Invalid email or password."}, status=status.HTTP_401_UNAUTHORIZED)
+        if password != customer.password:
+            return Response({"error": "Invalid email or password"}, status=401)
 
         token = create_token(customer)
-        return Response({"token": token})
+
+        return Response({
+            "token": token,
+            "id": customer.id,
+            "name": customer.name,
+            "email": customer.email
+        })
