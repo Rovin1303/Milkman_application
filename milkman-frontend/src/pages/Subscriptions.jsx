@@ -65,6 +65,8 @@ function Subscriptions() {
     }
   };
 
+  const isMilkSubscription = (sub) => /\bmilk\b/i.test(sub.product_name || "");
+
   useEffect(() => {
     const token = localStorage.getItem("customer_token");
     if (!token) {
@@ -101,6 +103,7 @@ function Subscriptions() {
                     <th>PRICE</th>
                     <th>START DATE</th>
                     <th>ADDRESS</th>
+                    <th>STATUS</th>
                     <th>ACTIONS</th>
                   </tr>
                 </thead>
@@ -115,7 +118,21 @@ function Subscriptions() {
                       <td>Rs. {s.total_price || s.product_price || 0}</td>
                       <td>{new Date(s.start_date).toLocaleDateString("en-IN")}</td>
                       <td>{s.delivery_address || "-"}</td>
+                      <td>{s.is_paused ? "Paused" : s.is_active ? "Active" : "Inactive"}</td>
                       <td className="action-cell">
+                        {isMilkSubscription(s) ? (
+                          <button
+                            className="delete-btn"
+                            onClick={() => togglePause(s)}
+                            title={s.is_paused ? "Resume this subscription" : "Pause this subscription"}
+                          >
+                            {s.is_paused ? "Resume" : "Pause"}
+                          </button>
+                        ) : (
+                          <button className="delete-btn" disabled title="Pause/Resume is for milk products only">
+                            N/A
+                          </button>
+                        )}
                         <button
                           className="delete-btn"
                           onClick={() => deleteSub(s)}

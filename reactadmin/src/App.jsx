@@ -8,12 +8,12 @@ import Customer from './pages/Customer';
 import Category from './pages/Category';
 import Product from './pages/Product';
 import Subscription from './pages/Subscription';
-
+// Private route component to check authentication
 const PrivateRoute = ({ children }) => {
     const isLoggedIn = !!localStorage.getItem('staffToken');
     return isLoggedIn ? children : <Navigate to="/login" />;
 };
-
+// Main App component
 function App() {
     const isLoggedIn = !!localStorage.getItem('staffToken');
 

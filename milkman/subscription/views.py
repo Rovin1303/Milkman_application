@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+import re
 from .models import Subscription
 from .serializers import SubscriptionSerializer
 from staff.auth import StaffTokenAuthentication
@@ -39,7 +40,33 @@ class SubscriptionViewSet(APIView):
     # partial update can be used for pause/resume toggling
     def patch(self, request, pk, format=None):
         subscription = Subscription.objects.get(pk=pk)
-        serializer = SubscriptionSerializer(subscription, data=request.data, partial=True)
+        data = request.data.copy()
+
+        def to_bool(value):
+            if isinstance(value, bool):
+                return value
+            if isinstance(value, str):
+                return value.strip().lower() in ("1", "true", "yes", "on")
+            return bool(value)
+
+        if "is_paused" in data:
+            wants_paused = to_bool(data.get("is_paused"))
+            product_name = (subscription.product.name or "").lower()
+            is_milk_product = re.search(r"\bmilk\b", product_name) is not None
+
+            if wants_paused and not is_milk_product:
+                return Response(
+                    {"detail": "Pause/Resume is allowed only for milk subscriptions."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Keep active/paused state consistent from backend side.
+            data["is_active"] = not wants_paused
+
+        elif "is_active" in data:
+            data["is_paused"] = not to_bool(data.get("is_active"))
+
+        serializer = SubscriptionSerializer(subscription, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

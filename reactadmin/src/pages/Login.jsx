@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-
+// Login component for staff authentication
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-
+// Check if already logged in on component mount
     useEffect(() => {
         if (localStorage.getItem('staffToken')) {
             navigate('/staff');
         }
     }, [navigate]);
-
+// Handle login form submission
     const handleLogin = async (e) => {
         e.preventDefault();
         setError(null);
