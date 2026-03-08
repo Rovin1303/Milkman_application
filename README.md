@@ -1,4 +1,4 @@
-# Milkman Project (Day Two)
+# Milkman Project
 
 Full-stack milk delivery project with a Django REST backend and two React frontends.
 
@@ -11,7 +11,6 @@ Full-stack milk delivery project with a Django REST backend and two React fronte
 ## Project Structure
 
 ```text
-daytwo/
   milkman/            # Django backend
   milkman-frontend/   # Customer-facing frontend (React)
   reactadmin/         # Admin panel frontend (React)
@@ -31,9 +30,6 @@ daytwo/
 
 From the workspace root (`milkproject`), activate the existing virtual environment:
 
-```powershell
-env\Scripts\Activate.ps1
-```
 
 If needed, install backend dependencies:
 
