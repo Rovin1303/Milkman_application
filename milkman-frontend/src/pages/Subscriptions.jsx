@@ -67,6 +67,14 @@ function Subscriptions() {
 
   const isMilkSubscription = (sub) => /\bmilk\b/i.test(sub.product_name || "");
 
+  const getPayableAmount = (sub) => {
+    // Paused milk subscriptions should not be charged until resumed.
+    if (isMilkSubscription(sub) && sub.is_paused) {
+      return 0;
+    }
+    return Number(sub.total_price || sub.product_price || 0);
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("customer_token");
     if (!token) {
@@ -76,7 +84,7 @@ function Subscriptions() {
     fetchSubs();
   }, []);
 
-  const total = subs.reduce((sum, s) => sum + Number(s.total_price || 0), 0);
+  const total = subs.reduce((sum, s) => sum + getPayableAmount(s), 0);
 
   const custId = localStorage.getItem("customer_id");
   return (
@@ -115,7 +123,7 @@ function Subscriptions() {
                       <td>{s.quantity}</td>
                       <td>{s.interval}</td>
                       <td>{s.duration_months || 1}</td>
-                      <td>Rs. {s.total_price || s.product_price || 0}</td>
+                      <td>Rs. {getPayableAmount(s)}</td>
                       <td>{new Date(s.start_date).toLocaleDateString("en-IN")}</td>
                       <td>{s.delivery_address || "-"}</td>
                       <td>{s.is_paused ? "Paused" : s.is_active ? "Active" : "Inactive"}</td>
@@ -128,11 +136,7 @@ function Subscriptions() {
                           >
                             {s.is_paused ? "Resume" : "Pause"}
                           </button>
-                        ) : (
-                          <button className="delete-btn" disabled title="Pause/Resume is for milk products only">
-                            N/A
-                          </button>
-                        )}
+                        ) : null}
                         <button
                           className="delete-btn"
                           onClick={() => deleteSub(s)}

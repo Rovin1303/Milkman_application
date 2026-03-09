@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 import re
+from datetime import date, timedelta
+from decimal import Decimal
 from .models import Subscription
 from .serializers import SubscriptionSerializer
 from staff.auth import StaffTokenAuthentication
@@ -41,6 +43,8 @@ class SubscriptionViewSet(APIView):
     def patch(self, request, pk, format=None):
         subscription = Subscription.objects.get(pk=pk)
         data = request.data.copy()
+        resume_requested = False
+        pause_requested = False
 
         def to_bool(value):
             if isinstance(value, bool):
@@ -54,7 +58,7 @@ class SubscriptionViewSet(APIView):
             product_name = (subscription.product.name or "").lower()
             is_milk_product = re.search(r"\bmilk\b", product_name) is not None
 
-            if wants_paused and not is_milk_product:
+            if not is_milk_product:
                 return Response(
                     {"detail": "Pause/Resume is allowed only for milk subscriptions."},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -62,13 +66,43 @@ class SubscriptionViewSet(APIView):
 
             # Keep active/paused state consistent from backend side.
             data["is_active"] = not wants_paused
+            pause_requested = (not subscription.is_paused) and wants_paused
+            # Resume becomes effective from tomorrow and paused days are deducted.
+            resume_requested = subscription.is_paused and not wants_paused
 
         elif "is_active" in data:
             data["is_paused"] = not to_bool(data.get("is_active"))
 
         serializer = SubscriptionSerializer(subscription, data=data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            updated_subscription = serializer.save()
+            if pause_requested:
+                updated_subscription.pause_start_date = date.today()
+                updated_subscription.save(update_fields=["pause_start_date"])
+            if resume_requested:
+                pause_from = updated_subscription.pause_start_date or date.today()
+                resume_effective_date = date.today() + timedelta(days=1)
+                # Do not deduct repeatedly for the same calendar day.
+                # Once start_date has already moved forward, only newly paused days are chargeable.
+                chargeable_from = max(pause_from, updated_subscription.start_date)
+                paused_days = max((resume_effective_date - chargeable_from).days, 0)
+
+                recurring_base = updated_subscription.product.subscription_amount
+                if recurring_base <= 0:
+                    recurring_base = updated_subscription.product.price
+
+                daily_price = Decimal(str(recurring_base)) * Decimal(str(updated_subscription.quantity))
+                deduction = daily_price * Decimal(paused_days)
+                current_total = Decimal(str(updated_subscription.total_price or 0))
+                new_total = current_total - deduction
+                if new_total < Decimal("0"):
+                    new_total = Decimal("0")
+
+                updated_subscription.start_date = resume_effective_date
+                updated_subscription.total_price = new_total
+                updated_subscription.pause_start_date = None
+                updated_subscription.save(update_fields=["start_date", "total_price", "pause_start_date"])
+                serializer = SubscriptionSerializer(updated_subscription)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

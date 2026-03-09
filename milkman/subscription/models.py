@@ -19,6 +19,7 @@ class Subscription(models.Model):
     is_active = models.BooleanField(default=True)
     # allow user to pause without fully cancelling
     is_paused = models.BooleanField(default=False)
+    pause_start_date = models.DateField(null=True, blank=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     delivery_address = models.CharField(max_length=255, blank=True, default='')
 
