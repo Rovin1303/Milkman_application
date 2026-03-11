@@ -1,21 +1,25 @@
 :root {
-  font-family: "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
+  font-family: "Nunito Sans", "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
   line-height: 1.6;
   font-weight: 400;
 
-  /* Color Palette */
-  --primary: #ff6b35;
-  --primary-dark: #e55a2b;
-  --secondary: #004e89;
-  --secondary-dark: #003d6b;
-  --accent: #1dd1a1;
-  --accent-dark: #16a085;
-  --bg-light: #f8f9fa;
-  --bg-lighter: #e8eeff;
-  --bg-soft: #f1f5ff;
-  --text-dark: #1a1a1a;
-  --text-light: #666;
-  --border: #e0e0e0;
+  --milk-cream: #fffdf8;
+  --milk-frost: #f4f8ff;
+  --milk-mist: #eaf2ff;
+  --milk-foam: #ffffff;
+  --dairy-blue: #15538a;
+  --dairy-blue-dark: #0f3f69;
+  --dairy-blue-soft: #2c6da8;
+  --butter-gold: #ffb347;
+  --caramel: #ff7a3d;
+  --mint-fresh: #35c9a6;
+  --mint-fresh-dark: #1ea584;
+  --text-dark: #17324d;
+  --text-mid: #4c637c;
+  --border-soft: #d6e4f4;
+  --shadow-soft: 0 12px 28px rgba(17, 57, 93, 0.12);
+  --shadow-strong: 0 18px 36px rgba(15, 63, 105, 0.2);
+  --page-max-width: 1320px;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -38,10 +42,10 @@ html, body, #root {
 
 body {
   color: var(--text-dark);
-  font-family: "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
+  font-family: "Nunito Sans", "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
   background:
-    radial-gradient(circle at 12% 0%, #ffffff 0%, #f4f7ff 38%, #edf3ff 100%),
-    linear-gradient(140deg, rgba(0, 78, 137, 0.06), rgba(255, 107, 53, 0.08));
+    radial-gradient(circle at 10% 8%, #ffffff 0%, #f8fbff 34%, #edf5ff 72%, #e7f0ff 100%),
+    linear-gradient(135deg, rgba(21, 83, 138, 0.08), rgba(255, 179, 71, 0.12));
   background-attachment: fixed;
 }
 
@@ -51,13 +55,13 @@ h1, h2, h3, h4, h5, h6 {
 
 a {
   font-weight: 500;
-  color: var(--primary);
+  color: var(--dairy-blue);
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 a:hover {
-  color: var(--primary-dark);
+  color: var(--dairy-blue-dark);
   text-decoration: underline;
 }
 
@@ -77,7 +81,7 @@ input, textarea, select {
 }
 
 .container {
-  max-width: 1180px;
+  max-width: var(--page-max-width);
   margin: 0 auto;
-  width: min(1180px, calc(100% - 2rem));
+  width: min(var(--page-max-width), calc(100% - 2rem));
 }

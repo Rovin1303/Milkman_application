@@ -16,30 +16,34 @@ const Layout = ({ children }) => {
 
     return (
         <div className="admin-shell">
-            <nav className="navbar navbar-expand-lg admin-navbar fixed-top">
-                <div className="container">
-                    <Link className="navbar-brand admin-brand" to="/">Milkman Admin</Link>
-                    <div className="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center w-100 gap-2">
-                        <ul className="navbar-nav me-auto">
-                            <li className="nav-item"><NavLink className="nav-link admin-nav-item" to="/staff">Staff</NavLink></li>
-                            <li className="nav-item"><NavLink className="nav-link admin-nav-item" to="/customer">Customers</NavLink></li>
-                            <li className="nav-item"><NavLink className="nav-link admin-nav-item" to="/category">Categories</NavLink></li>
-                            <li className="nav-item"><NavLink className="nav-link admin-nav-item" to="/product">Products</NavLink></li>
-                            <li className="nav-item"><NavLink className="nav-link admin-nav-item" to="/subscription">Subscriptions</NavLink></li>
+            <nav className="admin-navbar fixed-top">
+                <div className="container-fluid admin-topbar-inner px-4">
+                    <div className="admin-brand-stack">
+                        <Link className="admin-brand" to="/">Milkman Admin</Link>
+                        <span className="admin-brand-sub">Operations Console</span>
+                    </div>
+
+                    <div className="admin-nav-zone">
+                        <ul className="admin-menu">
+                            <li><NavLink className="admin-nav-item" to="/staff">Staff</NavLink></li>
+                            <li><NavLink className="admin-nav-item" to="/customer">Customers</NavLink></li>
+                            <li><NavLink className="admin-nav-item" to="/category">Categories</NavLink></li>
+                            <li><NavLink className="admin-nav-item" to="/product">Products</NavLink></li>
+                            <li><NavLink className="admin-nav-item" to="/subscription">Subscriptions</NavLink></li>
+                            <li><NavLink className="admin-nav-item" to="/orders">Orders</NavLink></li>
                         </ul>
-                        <ul className="navbar-nav ms-auto">
-                            <li className="nav-item">
-                                <span className="admin-user-chip">Welcome, {user.email}</span>
-                            </li>
-                            <li className="nav-item">
-                                <button className="btn btn-link nav-link admin-logout-btn" onClick={handleLogout}>Logout</button>
-                            </li>
-                        </ul>
+
+                        <div className="admin-profile-zone">
+                            <span className="admin-user-chip">{user.email}</span>
+                            <button className="admin-logout-btn" onClick={handleLogout}>Logout</button>
+                        </div>
                     </div>
                 </div>
             </nav>
-            <div className="container admin-content">
-                {children}
+            <div className="container-fluid admin-content px-4">
+                <div className="admin-content-frame">
+                    {children}
+                </div>
             </div>
         </div>
     );

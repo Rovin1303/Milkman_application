@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { Link } from "react-router-dom";
+import CustomerNavbar from "../components/CustomerNavbar";
 import "./Auth.css";
 
 function Login() {
@@ -27,36 +28,39 @@ function Login() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h2>Customer Login</h2>
+    <div className="auth-page">
+      <CustomerNavbar />
+      <div className="auth-container">
+        <div className="auth-card">
+          <h2>Customer Login</h2>
 
-        <div className="mb-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <div className="mb-4">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className="mb-6">
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <button onClick={handleLogin}>Login</button>
+
+          <p className="text-center mt-4 text-sm">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-blue-600 hover:underline">
+              Sign up
+            </Link>
+          </p>
         </div>
-
-        <div className="mb-6">
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-
-        <button onClick={handleLogin}>Login</button>
-
-        <p className="text-center mt-4 text-sm">
-          Don't have an account?{' '}
-          <Link to="/signup" className="text-blue-600 hover:underline">
-            Sign up
-          </Link>
-        </p>
       </div>
     </div>
   );

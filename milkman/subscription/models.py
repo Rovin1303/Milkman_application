@@ -20,17 +20,27 @@ class Subscription(models.Model):
     # allow user to pause without fully cancelling
     is_paused = models.BooleanField(default=False)
     pause_start_date = models.DateField(null=True, blank=True)
+    paused_days_total = models.PositiveIntegerField(default=0)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     delivery_address = models.CharField(max_length=255, blank=True, default='')
 
     def __str__(self):
         return f"{self.customer.name} -> {self.product.name}"
 
+    def _effective_paused_days(self):
+        from datetime import date
+
+        paused_days = int(self.paused_days_total or 0)
+        if self.is_paused and self.pause_start_date:
+            paused_days += max((date.today() - self.pause_start_date).days, 0)
+        return paused_days
+
     @property
     def end_date(self):
         from datetime import timedelta
         try:
-            # approximate by adding 30 days per month
-            return self.start_date + timedelta(days=30 * self.duration_months)
+            base_days = 30 * int(self.duration_months or 1)
+            total_days = max(base_days - 1 + self._effective_paused_days(), 0)
+            return self.start_date + timedelta(days=total_days)
         except Exception:
             return None

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import CustomerNavbar from "../components/CustomerNavbar";
 import "./Cart.css";
 
 function Cart() {
@@ -85,17 +86,31 @@ function Cart() {
         item_plans: itemPlans,
       });
       console.log("subscribe response", res.data);
-      if (res.data && res.data.subscriptions && res.data.subscriptions.length > 0) {
-        alert("Subscriptions created successfully.");
+      const subscriptionCount = res?.data?.subscriptions?.length || 0;
+      const orderCount = res?.data?.orders?.length || 0;
+
+      if (subscriptionCount > 0 || orderCount > 0) {
+        if (subscriptionCount > 0 && orderCount > 0) {
+          alert("Milk monthly subscription created and one-time orders placed.");
+          navigate("/orders");
+          return;
+        }
+        if (subscriptionCount > 0) {
+          alert("Milk subscription created successfully.");
+          navigate("/subscriptions");
+          return;
+        }
+        alert("One-time orders placed successfully.");
+        navigate("/orders");
+        return;
       } else {
         alert("No subscriptions were created. Please check your cart.");
       }
       setShowAddressModal(false);
       setAddressInput("");
-      navigate("/subscriptions");
     } catch (err) {
       console.error("Subscription error", err);
-      alert("Failed to create subscription. Please try again.");
+      alert(err?.response?.data?.error || "Failed to create subscription. Please try again.");
     } finally {
       setSubscribing(false);
     }
@@ -113,99 +128,102 @@ function Cart() {
   const total = items.reduce((sum, it) => sum + (it.product_price || 0) * it.quantity, 0);
 
   return (
-    <div className="cart-page container">
-      <h2>Your Cart</h2>
-      {items.length === 0 ? (
-        <p>Your cart is empty. Add some products to get started!</p>
-      ) : (
-        <>
-          <div className="table-wrapper">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Price</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((it) => (
-                  <tr key={it.id}>
-                    <td><strong>{it.product_name || it.product}</strong></td>
-                    <td>
-                      <div className="quantity-controls">
-                        <button className="quantity-btn" onClick={() => updateQuantity(it, Math.max(1, it.quantity - 1))}>-</button>
-                        <span style={{ fontWeight: 600, minWidth: "30px", textAlign: "center" }}>{it.quantity}</span>
-                        <button className="quantity-btn" onClick={() => updateQuantity(it, it.quantity + 1)}>+</button>
-                      </div>
-                    </td>
-                    <td><strong>Rs. {it.product_price || "-"}</strong></td>
-                    <td>
-                      <button className="remove-btn" onClick={() => removeItem(it)}>Remove</button>
-                    </td>
+    <div className="cart-page">
+      <CustomerNavbar />
+      <div className="container">
+        <h2>Your Cart</h2>
+        {items.length === 0 ? (
+          <p>Your cart is empty. Add some products to get started!</p>
+        ) : (
+          <>
+            <div className="table-wrapper">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="total-section">
-            Total: Rs. {total.toFixed(2)}
-          </div>
-        </>
-      )}
+                </thead>
+                <tbody>
+                  {items.map((it) => (
+                    <tr key={it.id}>
+                      <td><strong>{it.product_name || it.product}</strong></td>
+                      <td>
+                        <div className="quantity-controls">
+                          <button className="quantity-btn" onClick={() => updateQuantity(it, Math.max(1, it.quantity - 1))}>-</button>
+                          <span style={{ fontWeight: 600, minWidth: "30px", textAlign: "center" }}>{it.quantity}</span>
+                          <button className="quantity-btn" onClick={() => updateQuantity(it, it.quantity + 1)}>+</button>
+                        </div>
+                      </td>
+                      <td><strong>Rs. {it.product_price || "-"}</strong></td>
+                      <td>
+                        <button className="remove-btn" onClick={() => removeItem(it)}>Remove</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="total-section">
+              Total: Rs. {total.toFixed(2)}
+            </div>
+          </>
+        )}
 
-      {items.length > 0 && (
-        <div className="subscribe-section">
-          <h3>Subscribe and Deliver</h3>
-          <p className="subscribe-note">Only milk products can use monthly plans. All other products are one-time only.</p>
-          <button className="subscribe-btn" onClick={subscribe}>
-            Continue to Address and Plans
-          </button>
-        </div>
-      )}
-      {showAddressModal && (
-        <div className="modal-backdrop">
-          <div className="address-modal">
-            <h3>Delivery Address and Product Plans</h3>
-            <div className="plan-section">
-              {items.map((item) => {
-                const canChooseDuration = isMilkProduct(item);
-                return (
-                  <div className="plan-item-row" key={item.id}>
-                    <div className="plan-item-name">{item.product_name || `Product ${item.product}`}</div>
-                    <select
-                      value={itemPlans[item.id] || getDefaultPlan(item)}
-                      onChange={(e) => setItemPlans((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                      disabled={!canChooseDuration}
-                    >
-                      <option value="once">Once</option>
-                      {canChooseDuration && (
-                        <>
-                          <option value="1m">1 month</option>
-                          <option value="2m">2 months</option>
-                          <option value="3m">3 months</option>
-                        </>
-                      )}
-                    </select>
-                  </div>
-                );
-              })}
-              <p className="plan-note">Only milk products can be subscribed monthly. All other products are one-time delivery.</p>
-            </div>
-            <textarea
-              value={addressInput}
-              onChange={(e) => setAddressInput(e.target.value)}
-              placeholder="Enter full delivery address, including house/flat no, street, city, pincode"
-              rows={5}
-            />
-            <div className="modal-actions">
-              <button className="modal-cancel" onClick={() => setShowAddressModal(false)}>Cancel</button>
-              <button className="modal-submit" onClick={handleAddressSubmit} disabled={subscribing}>{subscribing ? "Saving..." : "Confirm and Subscribe"}</button>
+        {items.length > 0 && (
+          <div className="subscribe-section">
+            <h3>Subscribe and Deliver</h3>
+            <p className="subscribe-note">Only milk products can use monthly plans. All other products are one-time only.</p>
+            <button className="subscribe-btn" onClick={subscribe}>
+              Continue to Address and Plans
+            </button>
+          </div>
+        )}
+        {showAddressModal && (
+          <div className="modal-backdrop">
+            <div className="address-modal">
+              <h3>Delivery Address and Product Plans</h3>
+              <div className="plan-section">
+                {items.map((item) => {
+                  const canChooseDuration = isMilkProduct(item);
+                  return (
+                    <div className="plan-item-row" key={item.id}>
+                      <div className="plan-item-name">{item.product_name || `Product ${item.product}`}</div>
+                      <select
+                        value={itemPlans[item.id] || getDefaultPlan(item)}
+                        onChange={(e) => setItemPlans((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                        disabled={!canChooseDuration}
+                      >
+                        <option value="once">Once</option>
+                        {canChooseDuration && (
+                          <>
+                            <option value="1m">1 month</option>
+                            <option value="2m">2 months</option>
+                            <option value="3m">3 months</option>
+                          </>
+                        )}
+                      </select>
+                    </div>
+                  );
+                })}
+                <p className="plan-note">Only milk products can be subscribed monthly. All other products are one-time delivery.</p>
+              </div>
+              <textarea
+                value={addressInput}
+                onChange={(e) => setAddressInput(e.target.value)}
+                placeholder="Enter full delivery address, including house/flat no, street, city, pincode"
+                rows={5}
+              />
+              <div className="modal-actions">
+                <button className="modal-cancel" onClick={() => setShowAddressModal(false)}>Cancel</button>
+                <button className="modal-submit" onClick={handleAddressSubmit} disabled={subscribing}>{subscribing ? "Saving..." : "Confirm and Subscribe"}</button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

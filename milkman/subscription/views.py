@@ -1,13 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 import re
 from datetime import date, timedelta
-from decimal import Decimal
 from .models import Subscription
 from .serializers import SubscriptionSerializer
-from staff.auth import StaffTokenAuthentication
 
 class SubscriptionViewSet(APIView):
     # allow customers to hit this endpoint, staff may still use it
@@ -82,26 +79,10 @@ class SubscriptionViewSet(APIView):
             if resume_requested:
                 pause_from = updated_subscription.pause_start_date or date.today()
                 resume_effective_date = date.today() + timedelta(days=1)
-                # Do not deduct repeatedly for the same calendar day.
-                # Once start_date has already moved forward, only newly paused days are chargeable.
-                chargeable_from = max(pause_from, updated_subscription.start_date)
-                paused_days = max((resume_effective_date - chargeable_from).days, 0)
-
-                recurring_base = updated_subscription.product.subscription_amount
-                if recurring_base <= 0:
-                    recurring_base = updated_subscription.product.price
-
-                daily_price = Decimal(str(recurring_base)) * Decimal(str(updated_subscription.quantity))
-                deduction = daily_price * Decimal(paused_days)
-                current_total = Decimal(str(updated_subscription.total_price or 0))
-                new_total = current_total - deduction
-                if new_total < Decimal("0"):
-                    new_total = Decimal("0")
-
-                updated_subscription.start_date = resume_effective_date
-                updated_subscription.total_price = new_total
+                paused_days = max((resume_effective_date - pause_from).days, 0)
+                updated_subscription.paused_days_total = int(updated_subscription.paused_days_total or 0) + paused_days
                 updated_subscription.pause_start_date = None
-                updated_subscription.save(update_fields=["start_date", "total_price", "pause_start_date"])
+                updated_subscription.save(update_fields=["paused_days_total", "pause_start_date"])
                 serializer = SubscriptionSerializer(updated_subscription)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

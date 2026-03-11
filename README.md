@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Milkman Project (Day Two)
+=======
+# Milkman Project
+>>>>>>> 54ea6226e5ff4a8f26a3624d58d73d69683a7884
 
 Full-stack milk delivery project with a Django REST backend and two React frontends.
 
@@ -11,7 +15,10 @@ Full-stack milk delivery project with a Django REST backend and two React fronte
 ## Project Structure
 
 ```text
+<<<<<<< HEAD
 daytwo/
+=======
+>>>>>>> 54ea6226e5ff4a8f26a3624d58d73d69683a7884
   milkman/            # Django backend
   milkman-frontend/   # Customer-facing frontend (React)
   reactadmin/         # Admin panel frontend (React)
@@ -31,9 +38,12 @@ daytwo/
 
 From the workspace root (`milkproject`), activate the existing virtual environment:
 
+<<<<<<< HEAD
 ```powershell
 env\Scripts\Activate.ps1
 ```
+=======
+>>>>>>> 54ea6226e5ff4a8f26a3624d58d73d69683a7884
 
 If needed, install backend dependencies:
 
@@ -88,4 +98,8 @@ Default Vite URL: `http://localhost:5174/` (or next free port)
 
 - CORS is enabled in backend settings for local frontend development.
 - Database file is `milkman/db.sqlite3`.
+<<<<<<< HEAD
 - This setup is for local development (DEBUG mode enabled).
+=======
+- This setup is for local development (DEBUG mode enabled).
+>>>>>>> 54ea6226e5ff4a8f26a3624d58d73d69683a7884

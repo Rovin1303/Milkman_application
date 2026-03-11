@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import CustomerNavbar from "../components/CustomerNavbar";
 import "./Dashboard.css";
 
 const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1550583874-b2661d440523?w=400&h=300&fit=crop";
@@ -103,13 +104,6 @@ function Dashboard() {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("customer_token");
-    localStorage.removeItem("customer_name");
-    localStorage.removeItem("customer_id");
-    navigate("/");
-  };
-
   const getProductImage = (name) => {
     if (!name) return DEFAULT_IMAGE;
 
@@ -120,30 +114,7 @@ function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      <div className="navbar">
-        <h2>Milkman</h2>
-        <div className="navbar-actions">
-          <span className="nav-item" onClick={() => navigate("/cart")} style={{ cursor: "pointer" }}>
-            Cart
-          </span>
-          <span className="nav-item" onClick={() => navigate("/subscriptions")} style={{ cursor: "pointer" }}>
-            My Subscriptions
-          </span>
-          {localStorage.getItem("customer_token") ? (
-            <span className="nav-item logout" onClick={logout} style={{ cursor: "pointer" }}>
-              Logout
-            </span>
-          ) : (
-            <>
-              <span className="nav-item" onClick={() => navigate("/login")} style={{ cursor: "pointer" }}>Sign In</span>
-              <span className="nav-item" onClick={() => navigate("/signup")} style={{ cursor: "pointer" }}>Sign Up</span>
-            </>
-          )}
-          <span className="nav-item">
-            {localStorage.getItem("customer_name") || "Guest"}
-          </span>
-        </div>
-      </div>
+      <CustomerNavbar />
 
       <div className="welcome-card">
         <h2>Welcome to Milkman</h2>

@@ -8,6 +8,7 @@ import Customer from './pages/Customer';
 import Category from './pages/Category';
 import Product from './pages/Product';
 import Subscription from './pages/Subscription';
+import Orders from './pages/Orders';
 // Private route component to check authentication
 const PrivateRoute = ({ children }) => {
     const isLoggedIn = !!localStorage.getItem('staffToken');
@@ -27,6 +28,7 @@ function App() {
                     <Route path="/category" element={<PrivateRoute><Category /></PrivateRoute>} />
                     <Route path="/product" element={<PrivateRoute><Product /></PrivateRoute>} />
                     <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
+                    <Route path="/orders" element={<PrivateRoute><Orders /></PrivateRoute>} />
                     <Route path="/" element={<Navigate to={isLoggedIn ? '/staff' : '/login'} replace />} />
                     <Route path="*" element={<Navigate to={isLoggedIn ? "/staff" : "/login"} replace />} />
                 </Routes>

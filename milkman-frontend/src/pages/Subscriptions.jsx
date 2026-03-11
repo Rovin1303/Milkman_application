@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import CustomerNavbar from "../components/CustomerNavbar";
 import "./Subscriptions.css";
 
 function Subscriptions() {
@@ -27,7 +28,10 @@ function Subscriptions() {
       const res = await api.get("subscription/", { params: { customer: customerId } });
       console.log("subs response:", res.data);
       console.log("Number of subscriptions:", res.data?.length);
-      setSubs(res.data || []);
+      const monthlyMilkSubs = (res.data || []).filter(
+        (sub) => /\bmilk\b/i.test(sub.product_name || "") && sub.interval === "monthly"
+      );
+      setSubs(monthlyMilkSubs);
     } catch (err) {
       console.error("Subscription fetch error:", err.message);
       console.error("Full error:", err);
@@ -59,6 +63,7 @@ function Subscriptions() {
         is_paused: !sub.is_paused,
         is_active: sub.is_paused,
       });
+      alert(sub.is_paused ? "Subscription resumed. Next delivery starts from tomorrow." : "Subscription paused.");
       fetchSubs();
     } catch (err) {
       console.error("Pause/resume error", err);
@@ -68,11 +73,46 @@ function Subscriptions() {
   const isMilkSubscription = (sub) => /\bmilk\b/i.test(sub.product_name || "");
 
   const getPayableAmount = (sub) => {
-    // Paused milk subscriptions should not be charged until resumed.
-    if (isMilkSubscription(sub) && sub.is_paused) {
-      return 0;
-    }
     return Number(sub.total_price || sub.product_price || 0);
+  };
+
+  const formatDate = (value) => {
+    const d = new Date(value);
+    return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  };
+
+  const toDateOnly = (value) => {
+    const d = new Date(value);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  };
+
+  const getDaysUntilEnd = (sub) => {
+    const end = toDateOnly(sub.end_date);
+    const today = toDateOnly(new Date());
+    return Math.floor((end - today) / (1000 * 60 * 60 * 24));
+  };
+
+  const getRenewalMessage = (sub) => {
+    const days = getDaysUntilEnd(sub);
+    if (days < 0) return "Subscription ended. Renew now.";
+    if (days === 0) return "Subscription ending today. Renew now.";
+    if (days <= 2) return `Subscription ending in ${days} day(s).`;
+    return "";
+  };
+
+  const getMilkBilling = (sub) => {
+    const start = toDateOnly(sub.start_date);
+    const end = toDateOnly(sub.end_date);
+    const days = Math.max(Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1, 1);
+    const qty = Number(sub.quantity || 1);
+    const total = Number(sub.total_price || 0);
+    const perPacketPerDay = qty > 0 && days > 0 ? total / (qty * days) : Number(sub.product_price || 0);
+    return {
+      qty,
+      days,
+      perPacketPerDay,
+      total,
+    };
   };
 
   useEffect(() => {
@@ -82,13 +122,14 @@ function Subscriptions() {
       return;
     }
     fetchSubs();
-  }, []);
+  }, [navigate]);
 
   const total = subs.reduce((sum, s) => sum + getPayableAmount(s), 0);
 
   const custId = localStorage.getItem("customer_id");
   return (
     <div className="subscriptions-page">
+      <CustomerNavbar />
       <div className="container">
         <h2>Subscriptions of {customerName || "Customer"}</h2>
         {loading ? (
@@ -110,6 +151,7 @@ function Subscriptions() {
                     <th>MONTHS</th>
                     <th>PRICE</th>
                     <th>START DATE</th>
+                    <th>END DATE</th>
                     <th>ADDRESS</th>
                     <th>STATUS</th>
                     <th>ACTIONS</th>
@@ -124,9 +166,13 @@ function Subscriptions() {
                       <td>{s.interval}</td>
                       <td>{s.duration_months || 1}</td>
                       <td>Rs. {getPayableAmount(s)}</td>
-                      <td>{new Date(s.start_date).toLocaleDateString("en-IN")}</td>
+                      <td>{formatDate(s.start_date)}</td>
+                      <td>{formatDate(s.end_date)}</td>
                       <td>{s.delivery_address || "-"}</td>
-                      <td>{s.is_paused ? "Paused" : s.is_active ? "Active" : "Inactive"}</td>
+                      <td>
+                        {s.is_paused ? "Paused" : s.is_active ? "Active" : "Inactive"}
+                        {getRenewalMessage(s) ? <div className="renew-warning">{getRenewalMessage(s)}</div> : null}
+                      </td>
                       <td className="action-cell">
                         {isMilkSubscription(s) ? (
                           <button
@@ -144,12 +190,34 @@ function Subscriptions() {
                         >
                           Delete
                         </button>
+                        {getDaysUntilEnd(s) <= 0 ? (
+                          <button className="delete-btn" onClick={() => navigate("/cart")} title="Renew this subscription">
+                            Renew
+                          </button>
+                        ) : null}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+
+            {subs.filter((s) => isMilkSubscription(s)).map((s) => {
+              const bill = getMilkBilling(s);
+              return (
+                <div className="milk-bill-card" key={`milk-bill-${s.id}`}>
+                  <h3>{s.product_name} subscription bill</h3>
+                  <p>
+                    Subscribed from {formatDate(s.start_date)} to {formatDate(s.end_date)} ({bill.days} days)
+                  </p>
+                  <p>
+                    Rs. {bill.perPacketPerDay.toFixed(2)} per packet x {bill.qty} packet(s) x {bill.days} days
+                  </p>
+                  <strong>Total amount: Rs. {bill.total.toFixed(2)}</strong>
+                </div>
+              );
+            })}
+
             <div className="total-section">
               <strong>Total value: Rs. {total.toFixed(2)}</strong>
             </div>

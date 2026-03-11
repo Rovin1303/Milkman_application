@@ -3,9 +3,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from decimal import Decimal
 import re
+from uuid import uuid4
+from django.utils import timezone
 from .models import CartItem
 from .serializers import CartItemSerializer
 from subscription.models import Subscription
+from orders.models import Order, OrderItem
 
 
 class CartItemViewSet(APIView):
@@ -93,7 +96,14 @@ class CartSubscribeView(APIView):
                 return "monthly", months if months in (1, 2, 3) else 1
             return "monthly", 1
 
-        created = []
+        created_subscriptions = []
+        created_orders = []
+        order = None
+        order_total = Decimal("0.00")
+
+        def generate_order_code():
+            return f"ORD-{timezone.now().strftime('%Y%m%d%H%M%S')}-{str(uuid4())[:6].upper()}"
+
         for item in items:
             product_name = (item.product.name or "").lower()
             is_milk_product = re.search(r"\bmilk\b", product_name) is not None
@@ -117,6 +127,25 @@ class CartSubscribeView(APIView):
             else:
                 total_price = recurring_base * quantity
 
+            if final_interval == "once":
+                if order is None:
+                    order = Order.objects.create(
+                        customer=item.customer,
+                        order_code=generate_order_code(),
+                        delivery_address=delivery_address or (item.customer.address or ""),
+                        total_amount=Decimal("0.00"),
+                    )
+
+                OrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    unit_price=product_price,
+                    line_total=total_price,
+                )
+                order_total += total_price
+                continue
+
             sub = Subscription.objects.create(
                 customer=item.customer,
                 product=item.product,
@@ -127,7 +156,7 @@ class CartSubscribeView(APIView):
                 total_price=total_price,
                 delivery_address=delivery_address or (item.customer.address or ""),
             )
-            created.append(
+            created_subscriptions.append(
                 {
                     "id": sub.id,
                     "product": item.product.name,
@@ -136,6 +165,24 @@ class CartSubscribeView(APIView):
                     "total_price": str(total_price),
                 }
             )
+
+        if order is not None:
+            order.total_amount = order_total
+            order.save(update_fields=["total_amount"])
+            created_orders.append(
+                {
+                    "id": order.id,
+                    "order_code": order.order_code,
+                    "total_amount": str(order.total_amount),
+                }
+            )
+
         # clear the cart
         items.delete()
-        return Response({"subscriptions": created}, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "subscriptions": created_subscriptions,
+                "orders": created_orders,
+            },
+            status=status.HTTP_201_CREATED,
+        )
