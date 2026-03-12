@@ -1,67 +1,63 @@
-<<<<<<< HEAD
-# Milkman Project (Day Two)
-=======
-# Milkman Project
->>>>>>> 54ea6226e5ff4a8f26a3624d58d73d69683a7884
+# Milkman - Full Stack Dairy Delivery Platform
 
-Full-stack milk delivery project with a Django REST backend and two React frontends.
+Milkman is a full-stack dairy delivery project with:
+- Django REST backend
+- Customer web app (React + Vite)
+- Admin web app (React + Vite + Bootstrap)
+
+It supports catalog browsing, cart checkout, monthly milk subscriptions, one-time orders, and admin management operations.
 
 ## Tech Stack
 
 - Backend: Django, Django REST Framework, SQLite
-- Frontend (User): React + Vite (`milkman-frontend`)
-- Frontend (Admin): React + Vite + Bootstrap (`reactadmin`)
+- Customer App: React, Vite
+- Admin App: React, Vite, Bootstrap
 
 ## Project Structure
 
 ```text
-<<<<<<< HEAD
 daytwo/
-=======
->>>>>>> 54ea6226e5ff4a8f26a3624d58d73d69683a7884
-  milkman/            # Django backend
-  milkman-frontend/   # Customer-facing frontend (React)
-  reactadmin/         # Admin panel frontend (React)
+  milkman/            Django backend
+  milkman-frontend/   Customer-facing frontend
+  reactadmin/         Admin panel frontend
   PRODUCTS_CATALOG.md
+  README.md
 ```
 
-## Login Credentials
+## Core Functional Flow
 
-- User login
-  - Username: `user@gmail.com`
-  - Password: `user`
-- Admin login
-  - Username: `admin@gmail.com`
-  - Password: `admin123`
+- Milk products can be checked out as monthly subscriptions.
+- Non-milk products are handled as one-time orders.
+- Checkout supports mixed carts.
+- One-time orders are grouped by order batch code.
+- Subscriptions and orders are shown separately in the customer UI.
 
-## Backend Setup (Django)
+## Applications and URLs
 
-From the workspace root (`milkproject`), activate the existing virtual environment:
+- Backend API: http://127.0.0.1:8000/
+- Customer Frontend (Vite): usually http://localhost:5173/
+- Admin Frontend (Vite): usually http://localhost:5174/ (or next free port)
 
-<<<<<<< HEAD
+## Local Setup
+
+### 1. Backend Setup (Django)
+
+From workspace root (milkproject):
+
 ```powershell
 env\Scripts\Activate.ps1
-```
-=======
->>>>>>> 54ea6226e5ff4a8f26a3624d58d73d69683a7884
-
-If needed, install backend dependencies:
-
-```powershell
-pip install django djangorestframework django-cors-headers requests
-```
-
-Go to backend folder and run server:
-
-```powershell
 cd milkman\daytwo\milkman
 python manage.py migrate
 python manage.py runserver
 ```
 
-Backend base URL: `http://127.0.0.1:8000/`
+If packages are missing:
 
-## Frontend Setup (Customer App)
+```powershell
+pip install django djangorestframework django-cors-headers requests
+```
+
+### 2. Customer Frontend Setup
 
 ```powershell
 cd milkman\daytwo\milkman-frontend
@@ -69,9 +65,7 @@ npm install
 npm run dev
 ```
 
-Default Vite URL: `http://localhost:5173/`
-
-## Frontend Setup (Admin App)
+### 3. Admin Frontend Setup
 
 ```powershell
 cd milkman\daytwo\reactadmin
@@ -79,27 +73,48 @@ npm install
 npm run dev
 ```
 
-Default Vite URL: `http://localhost:5174/` (or next free port)
+## API Overview
 
-## Main API Routes
+### Authentication
 
-- `POST /staff/login/` - staff/admin login
+- `POST /staff/login/` - staff login
+- `POST /customer/login/` - customer login
+
+### Master Data
+
 - `GET|POST /staff/staff/`
 - `PUT|DELETE /staff/staff/<id>/`
-- `POST /customer/login/` - customer login
 - `GET|POST /customer/`
 - `GET|POST /category/`
 - `GET|POST /product/`
-- `GET|POST /subscription/`
+
+### Shopping and Billing
+
 - `GET|POST /cart/`
 - `POST /cart/subscribe/`
+- `GET /orders/`
+- `GET|POST /subscription/`
+
+## Default Login Credentials (Local Demo)
+
+- Customer
+  - Email: `user@gmail.com`
+  - Password: `user`
+- Admin/Staff
+  - Email: `admin@gmail.com`
+  - Password: `admin123`
 
 ## Notes
 
-- CORS is enabled in backend settings for local frontend development.
-- Database file is `milkman/db.sqlite3`.
-<<<<<<< HEAD
-- This setup is for local development (DEBUG mode enabled).
-=======
-- This setup is for local development (DEBUG mode enabled).
->>>>>>> 54ea6226e5ff4a8f26a3624d58d73d69683a7884
+- CORS is enabled for local development.
+- Primary database file: `milkman/db.sqlite3`.
+- This setup is intended for development mode.
+
+## Troubleshooting
+
+- Backend not reachable:
+  - Ensure `python manage.py runserver` is running from `milkman/daytwo/milkman`.
+- Frontend API errors:
+  - Confirm backend is running on `127.0.0.1:8000`.
+- Port already in use:
+  - Vite automatically offers the next free port.
