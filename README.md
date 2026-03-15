@@ -48,7 +48,7 @@ From workspace root (milkproject):
 env\Scripts\Activate.ps1
 cd milkman\daytwo\milkman
 python manage.py migrate
-python manage.py runserver
+python manage.py runservers
 ```
 
 If packages are missing:
