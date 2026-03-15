@@ -7,7 +7,6 @@ on:
 
 jobs:
   deploy:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -24,22 +23,10 @@ jobs:
 
       - name: Deploy on VM
         run: |
-          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
           cd /home/azureuser/projects/milkproject
 
           git pull origin main
-
-          cd milkman-frontend
-          npm install
-          npm run build
-
-          cd ../reactadmin
-          npm install
-          npm run build
-
-          cd ../milkman
-          source ../env/bin/activate
-          pip install -r ../requirements.txt
 
           pm2 restart all
 
