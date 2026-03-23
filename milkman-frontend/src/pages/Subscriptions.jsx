@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import CustomerNavbar from "../components/CustomerNavbar";
 import "./Subscriptions.css";
 
 function Subscriptions() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [subs, setSubs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [feedback, setFeedback] = useState(location.state?.flashMessage || "");
 
   const fetchSubs = async () => {
     setLoading(true);
@@ -63,7 +65,7 @@ function Subscriptions() {
         is_paused: !sub.is_paused,
         is_active: sub.is_paused,
       });
-      alert(sub.is_paused ? "Subscription resumed. Next delivery starts from tomorrow." : "Subscription paused.");
+      setFeedback(sub.is_paused ? "Subscription resumed. Next delivery starts from tomorrow." : "Subscription paused.");
       fetchSubs();
     } catch (err) {
       console.error("Pause/resume error", err);
@@ -124,6 +126,12 @@ function Subscriptions() {
     fetchSubs();
   }, [navigate]);
 
+  useEffect(() => {
+    if (!feedback) return;
+    const timer = setTimeout(() => setFeedback(""), 3500);
+    return () => clearTimeout(timer);
+  }, [feedback]);
+
   const total = subs.reduce((sum, s) => sum + getPayableAmount(s), 0);
 
   const custId = localStorage.getItem("customer_id");
@@ -132,6 +140,7 @@ function Subscriptions() {
       <CustomerNavbar />
       <div className="container">
         <h2>Subscriptions of {customerName || "Customer"}</h2>
+        {feedback ? <div className="sub-success-box">{feedback}</div> : null}
         {loading ? (
           <p>Loading...</p>
         ) : errorMessage ? (

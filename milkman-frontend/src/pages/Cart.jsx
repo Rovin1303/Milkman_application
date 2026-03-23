@@ -11,6 +11,10 @@ function Cart() {
   const [addressInput, setAddressInput] = useState("");
   const [subscribing, setSubscribing] = useState(false);
   const [itemPlans, setItemPlans] = useState({});
+  const [feedback, setFeedback] = useState({ type: "", text: "" });
+  const [registeredAddress, setRegisteredAddress] = useState("");
+  const [useRegisteredAddress, setUseRegisteredAddress] = useState(false);
+  const [loadingRegisteredAddress, setLoadingRegisteredAddress] = useState(false);
 
   const isMilkProduct = (item) => {
     const name = String(item.product_name || "").toLowerCase();
@@ -23,11 +27,16 @@ function Cart() {
 
   const fetchCart = async () => {
     const customerId = localStorage.getItem("customer_id");
-    if (!customerId) return;
+    if (!customerId) {
+      window.dispatchEvent(new CustomEvent("cart:sync", { detail: { count: 0 } }));
+      return;
+    }
     try {
       const res = await api.get("cart/", { params: { customer: customerId } });
       const cartItems = res.data || [];
       setItems(cartItems);
+      const totalItems = cartItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+      window.dispatchEvent(new CustomEvent("cart:sync", { detail: { count: totalItems } }));
       setItemPlans((prev) => {
         const next = { ...prev };
         cartItems.forEach((item) => {
@@ -61,28 +70,52 @@ function Cart() {
     }
   };
 
+  const fetchRegisteredAddress = async () => {
+    const customerId = localStorage.getItem("customer_id");
+    if (!customerId) return "";
+
+    setLoadingRegisteredAddress(true);
+    try {
+      const res = await api.get(`customer/${customerId}/`);
+      const savedAddress = (res?.data?.address || "").trim();
+      setRegisteredAddress(savedAddress);
+      if (savedAddress) {
+        setUseRegisteredAddress(true);
+        setAddressInput(savedAddress);
+      }
+      return savedAddress;
+    } catch (err) {
+      console.error("Registered address fetch error", err);
+      return "";
+    } finally {
+      setLoadingRegisteredAddress(false);
+    }
+  };
+
   const subscribe = async () => {
     const customerId = localStorage.getItem("customer_id");
     if (!customerId) return;
     if (items.length === 0) {
-      alert("Your cart is empty. Add some products before subscribing.");
+      setFeedback({ type: "error", text: "Your cart is empty. Add products before placing an order." });
       return;
     }
+    await fetchRegisteredAddress();
     setShowAddressModal(true);
   };
 
   const handleAddressSubmit = async () => {
     const customerId = localStorage.getItem("customer_id");
     if (!customerId) return;
-    if (!addressInput || addressInput.trim().length < 5) {
-      alert("Please enter a valid delivery address.");
+    const finalAddress = (useRegisteredAddress ? registeredAddress : addressInput || "").trim();
+    if (!finalAddress || finalAddress.length < 5) {
+      setFeedback({ type: "error", text: "Please enter a valid delivery address." });
       return;
     }
     setSubscribing(true);
     try {
       const res = await api.post("cart/subscribe/", {
         customer: customerId,
-        delivery_address: addressInput,
+        delivery_address: finalAddress,
         item_plans: itemPlans,
       });
       console.log("subscribe response", res.data);
@@ -91,26 +124,23 @@ function Cart() {
 
       if (subscriptionCount > 0 || orderCount > 0) {
         if (subscriptionCount > 0 && orderCount > 0) {
-          alert("Milk monthly subscription created and one-time orders placed.");
-          navigate("/orders");
+          navigate("/orders", { state: { flashMessage: "Successfully placed your one-time order and subscription." } });
           return;
         }
         if (subscriptionCount > 0) {
-          alert("Milk subscription created successfully.");
-          navigate("/subscriptions");
+          navigate("/subscriptions", { state: { flashMessage: "Subscription created successfully." } });
           return;
         }
-        alert("One-time orders placed successfully.");
-        navigate("/orders");
+        navigate("/orders", { state: { flashMessage: "Successfully order placed." } });
         return;
       } else {
-        alert("No subscriptions were created. Please check your cart.");
+        setFeedback({ type: "error", text: "No order was created. Please check your cart and try again." });
       }
       setShowAddressModal(false);
       setAddressInput("");
     } catch (err) {
       console.error("Subscription error", err);
-      alert(err?.response?.data?.error || "Failed to create subscription. Please try again.");
+      setFeedback({ type: "error", text: err?.response?.data?.error || "Failed to place order. Please try again." });
     } finally {
       setSubscribing(false);
     }
@@ -132,6 +162,9 @@ function Cart() {
       <CustomerNavbar />
       <div className="container">
         <h2>Your Cart</h2>
+        {feedback.text ? (
+          <div className={`cart-feedback ${feedback.type === "error" ? "error" : "success"}`}>{feedback.text}</div>
+        ) : null}
         {items.length === 0 ? (
           <p>Your cart is empty. Add some products to get started!</p>
         ) : (
@@ -210,11 +243,38 @@ function Cart() {
                 })}
                 <p className="plan-note">Only milk products can be subscribed monthly. All other products are one-time delivery.</p>
               </div>
+
+                <div className="address-source-box">
+                  <label className="address-source-label">
+                    <input
+                      type="checkbox"
+                      checked={useRegisteredAddress}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setUseRegisteredAddress(checked);
+                        if (checked && registeredAddress) {
+                          setAddressInput(registeredAddress);
+                        }
+                      }}
+                      disabled={!registeredAddress}
+                    />
+                    Use my registered address
+                  </label>
+                  {loadingRegisteredAddress ? (
+                    <div className="address-hint">Fetching your registered address...</div>
+                  ) : registeredAddress ? (
+                    <div className="address-hint">Saved address: {registeredAddress}</div>
+                  ) : (
+                    <div className="address-hint">No registered address found. Please enter delivery address below.</div>
+                  )}
+                </div>
+
               <textarea
                 value={addressInput}
                 onChange={(e) => setAddressInput(e.target.value)}
                 placeholder="Enter full delivery address, including house/flat no, street, city, pincode"
                 rows={5}
+                  disabled={useRegisteredAddress && !!registeredAddress}
               />
               <div className="modal-actions">
                 <button className="modal-cancel" onClick={() => setShowAddressModal(false)}>Cancel</button>

@@ -9,6 +9,13 @@ const Product = () => {
         category: '',
         description: ''
     });
+    const [editingId, setEditingId] = useState(null);
+    const [editItem, setEditItem] = useState({
+        name: '',
+        price: '',
+        category: '',
+        description: ''
+    });
 
     const loadItems = async () => {
         try {
@@ -46,6 +53,35 @@ const Product = () => {
             loadItems();
         } catch (err) {
             console.error('Error deleting product:', err);
+        }
+    };
+
+    const startEdit = (item) => {
+        setEditingId(item.id);
+        setEditItem({
+            name: item.name || '',
+            price: item.price || '',
+            category: item.category || '',
+            description: item.description || ''
+        });
+    };
+
+    const cancelEdit = () => {
+        setEditingId(null);
+        setEditItem({ name: '', price: '', category: '', description: '' });
+    };
+
+    const saveEdit = async (id) => {
+        try {
+            await api.put(`/product/${id}/`, {
+                ...editItem,
+                category: Number(editItem.category),
+                price: Number(editItem.price)
+            });
+            cancelEdit();
+            loadItems();
+        } catch (err) {
+            console.error('Error updating product:', err);
         }
     };
 
@@ -121,12 +157,67 @@ const Product = () => {
                     <tbody>
                         {items.map(item => (
                             <tr key={item.id}>
-                                <td>{item.name}</td>
-                                <td>${parseFloat(item.price).toFixed(2)}</td>
-                                <td>{item.category}</td>
-                                <td>{item.description}</td>
                                 <td>
-                                    <button className="btn btn-danger btn-sm admin-action-btn" onClick={() => deleteItem(item.id)}>Delete</button>
+                                    {editingId === item.id ? (
+                                        <input
+                                            type="text"
+                                            className="form-control form-control-sm"
+                                            value={editItem.name}
+                                            onChange={(e) => setEditItem((prev) => ({ ...prev, name: e.target.value }))}
+                                        />
+                                    ) : (
+                                        item.name
+                                    )}
+                                </td>
+                                <td>
+                                    {editingId === item.id ? (
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            className="form-control form-control-sm"
+                                            value={editItem.price}
+                                            onChange={(e) => setEditItem((prev) => ({ ...prev, price: e.target.value }))}
+                                        />
+                                    ) : (
+                                        `$${parseFloat(item.price).toFixed(2)}`
+                                    )}
+                                </td>
+                                <td>
+                                    {editingId === item.id ? (
+                                        <input
+                                            type="number"
+                                            className="form-control form-control-sm"
+                                            value={editItem.category}
+                                            onChange={(e) => setEditItem((prev) => ({ ...prev, category: e.target.value }))}
+                                        />
+                                    ) : (
+                                        item.category
+                                    )}
+                                </td>
+                                <td>
+                                    {editingId === item.id ? (
+                                        <input
+                                            type="text"
+                                            className="form-control form-control-sm"
+                                            value={editItem.description}
+                                            onChange={(e) => setEditItem((prev) => ({ ...prev, description: e.target.value }))}
+                                        />
+                                    ) : (
+                                        item.description
+                                    )}
+                                </td>
+                                <td className="d-flex gap-2">
+                                    {editingId === item.id ? (
+                                        <>
+                                            <button className="btn btn-primary btn-sm admin-action-btn" onClick={() => saveEdit(item.id)}>Save</button>
+                                            <button className="btn btn-secondary btn-sm admin-action-btn" onClick={cancelEdit}>Cancel</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button className="btn btn-warning btn-sm admin-action-btn" onClick={() => startEdit(item)}>Edit</button>
+                                            <button className="btn btn-danger btn-sm admin-action-btn" onClick={() => deleteItem(item.id)}>Delete</button>
+                                        </>
+                                    )}
                                 </td>
                             </tr>
                         ))}

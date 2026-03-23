@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import CustomerNavbar from "../components/CustomerNavbar";
 import "./Orders.css";
 
 function Orders() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [subs, setSubs] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [flashMessage, setFlashMessage] = useState(location.state?.flashMessage || "");
 
   const fetchOrdersData = async () => {
     const customerId = localStorage.getItem("customer_id");
@@ -40,6 +42,12 @@ function Orders() {
     }
     fetchOrdersData();
   }, [navigate]);
+
+  useEffect(() => {
+    if (!flashMessage) return;
+    const timer = setTimeout(() => setFlashMessage(""), 3500);
+    return () => clearTimeout(timer);
+  }, [flashMessage]);
 
   const isMilk = (sub) => /\bmilk\b/i.test(sub.product_name || "");
 
@@ -77,13 +85,15 @@ function Orders() {
       <CustomerNavbar />
       <div className="container">
         <h2>Your Orders</h2>
-        <p className="orders-note">Clear split: upcoming subscription delivery and your latest one-time order.</p>
+        <p className="orders-note">Upcoming subscription delivery and your latest one-time order are shown separately.</p>
+
+        {flashMessage ? <div className="order-success-box">{flashMessage}</div> : null}
 
         {loading ? <p>Loading orders...</p> : null}
 
         {!loading && activeMilkSubs.length > 0 ? (
           <section className="orders-section">
-            <h3>Upcoming Milk Delivery ({tomorrowLabel})</h3>
+            <h3>Upcoming Subscription Delivery ({tomorrowLabel})</h3>
             <div className="table-wrapper">
               <table className="orders-table">
                 <thead>
@@ -119,9 +129,9 @@ function Orders() {
 
         {!loading ? (
           <section className="orders-section">
-            <h3>Current One-Time Order (Latest Order ID)</h3>
+            <h3>Latest One-Time Order</h3>
             {!latestOrder ? (
-              <p className="orders-note">No current one-time order available.</p>
+              <p className="orders-note">No one-time order available.</p>
             ) : (
               <div className="current-orders-box order-highlight">
                 <div className="order-meta">

@@ -52,6 +52,7 @@ function Dashboard() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [feedback, setFeedback] = useState({ type: "", text: "" });
 
   const fetchProducts = async () => {
     try {
@@ -98,9 +99,11 @@ function Dashboard() {
     }
     try {
       await api.post("cart/", { customer: customerId, product: product.id, quantity: 1 });
-      alert("Added to cart");
+      window.dispatchEvent(new CustomEvent("cart:increment", { detail: { delta: 1 } }));
+      setFeedback({ type: "success", text: `${product.name} added to cart successfully.` });
     } catch (err) {
       console.error("Add to cart error", err);
+      setFeedback({ type: "error", text: "Could not add product to cart. Please try again." });
     }
   };
 
@@ -120,6 +123,12 @@ function Dashboard() {
         <h2>Welcome to Milkman</h2>
         <p>Fresh and quality dairy products delivered to your doorstep.</p>
       </div>
+
+      {feedback.text ? (
+        <div className={`dashboard-feedback ${feedback.type === "error" ? "error" : "success"}`}>
+          {feedback.text}
+        </div>
+      ) : null}
 
       <div className="dashboard-metrics">
         <div className="metric-card">

@@ -21,6 +21,16 @@
   letter-spacing: -0.5px;
 }
 
+.sub-success-box {
+  background: #eafaf3;
+  border: 1px solid #86d8b3;
+  color: #0c6a43;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 0 0 14px;
+  font-weight: 700;
+}
+
 .table-wrapper {
   background: rgba(255, 255, 255, 0.94);
   border-radius: 15px;

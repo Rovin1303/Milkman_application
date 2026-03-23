@@ -19,6 +19,25 @@
   font-weight: 700;
 }
 
+.cart-feedback {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.cart-feedback.success {
+  background: #eafaf3;
+  border: 1px solid #86d8b3;
+  color: #0c6a43;
+}
+
+.cart-feedback.error {
+  background: #fff0f0;
+  border: 1px solid #f0aaaa;
+  color: #8f1f1f;
+}
+
 .table-wrapper {
   background: rgba(255, 255, 255, 0.94);
   border-radius: 15px;
@@ -238,6 +257,28 @@
   box-sizing: border-box;
   resize: vertical;
   font-size: 14px;
+}
+
+.address-source-box {
+  background: #f8fbff;
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 0 0 10px;
+}
+
+.address-source-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--dairy-blue-dark);
+}
+
+.address-hint {
+  margin-top: 8px;
+  color: var(--text-mid);
+  font-size: 12px;
 }
 
 .plan-section {

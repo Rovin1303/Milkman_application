@@ -18,8 +18,13 @@ class CustomerViewSet(APIView):
     authentication_classes = []
     permission_classes = []
 
-    # ✅ GET - List all customers
-    def get(self, request):
+    # ✅ GET - List all customers or fetch single customer
+    def get(self, request, pk=None):
+        if pk is not None:
+            customer = get_object_or_404(Customer, pk=pk)
+            serializer = CustomerSerializer(customer)
+            return Response(serializer.data)
+
         customers = Customer.objects.all()
         serializer = CustomerSerializer(customers, many=True)
         return Response(serializer.data)

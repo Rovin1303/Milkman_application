@@ -33,6 +33,27 @@
   font-size: 1rem;
 }
 
+.dashboard-feedback {
+  width: min(var(--page-max-width), calc(100% - 2rem));
+  margin: 0 auto 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.dashboard-feedback.success {
+  background: #eafaf3;
+  border: 1px solid #86d8b3;
+  color: #0c6a43;
+}
+
+.dashboard-feedback.error {
+  background: #fff0f0;
+  border: 1px solid #f0aaaa;
+  color: #8f1f1f;
+}
+
 .dashboard-metrics {
   width: min(var(--page-max-width), calc(100% - 2rem));
   margin: 0 auto 18px;
@@ -169,6 +190,7 @@
   transform: translateY(-1px);
   box-shadow: 0 10px 22px rgba(243, 107, 57, 0.35);
 }
+
 
 @media (max-width: 900px) {
   .dashboard-metrics {

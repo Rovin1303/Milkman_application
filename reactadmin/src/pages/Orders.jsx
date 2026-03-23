@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
@@ -28,24 +28,13 @@ const Orders = () => {
         };
     }, [customerFilter]);
 
-    const currentOrder = useMemo(() => {
-        if (!orders.length) return null;
-        return orders[0];
-    }, [orders]);
-
-    const previousOrders = useMemo(() => {
-        if (orders.length <= 1) return [];
-        return orders.slice(1);
-    }, [orders]);
-
-    const totalCurrent = Number(currentOrder?.total_amount || 0);
-    const totalPrevious = previousOrders.reduce((sum, order) => sum + Number(order.total_amount || 0), 0);
+    const grandTotal = orders.reduce((sum, order) => sum + Number(order.total_amount || 0), 0);
 
     return (
         <div className="admin-page mt-4">
             <button className="btn btn-outline-secondary btn-sm mb-3" onClick={() => navigate(-1)}>Back</button>
             <h2 className="admin-page-title">Orders Management</h2>
-            <p className="admin-page-subtitle">Track one-time order batches by unique order ID.</p>
+            <p className="admin-page-subtitle">Track all one-time orders in table format.</p>
 
             <div className="mb-3 row admin-form">
                 <div className="col-md-3">
@@ -60,16 +49,16 @@ const Orders = () => {
                 </div>
             </div>
 
-            <div className="card mb-4 mt-3 admin-panel">
-                <div className="card-body">
-                    <h5 className="card-title">Current Order (Latest Order ID)</h5>
-                    {!currentOrder ? (
-                        <p className="mb-0">No current orders found.</p>
-                    ) : (
+            <div className="admin-card mb-4 mt-3 admin-panel">
+                {orders.length === 0 ? (
+                    <p className="mb-0">No orders found.</p>
+                ) : (
+                    <>
                         <div className="admin-table-wrap">
                             <table className="table table-striped table-hover align-middle admin-table">
                                 <thead>
                                     <tr>
+                                        <th>#</th>
                                         <th>ORDER ID</th>
                                         <th>CUSTOMER ID</th>
                                         <th>DATE</th>
@@ -79,49 +68,9 @@ const Orders = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>{currentOrder.order_code}</td>
-                                        <td>{currentOrder.customer}</td>
-                                        <td>{new Date(currentOrder.created_at).toLocaleDateString('en-IN')}</td>
-                                        <td>{currentOrder.delivery_address || '-'}</td>
-                                        <td>
-                                            {(currentOrder.items || []).map((item) => (
-                                                <div key={item.id}>
-                                                    {item.product_name} x {item.quantity} = Rs. {Number(item.line_total || 0).toFixed(2)}
-                                                </div>
-                                            ))}
-                                        </td>
-                                        <td>Rs. {Number(currentOrder.total_amount || 0).toFixed(2)}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                    <div className="mt-2"><strong>Current order total: Rs. {totalCurrent.toFixed(2)}</strong></div>
-                </div>
-            </div>
-
-            <div className="card mb-4 mt-3 admin-panel">
-                <div className="card-body">
-                    <h5 className="card-title">Previous Orders</h5>
-                    {previousOrders.length === 0 ? (
-                        <p className="mb-0">No previous orders found.</p>
-                    ) : (
-                        <div className="admin-table-wrap">
-                            <table className="table table-striped table-hover align-middle admin-table">
-                                <thead>
-                                    <tr>
-                                        <th>ORDER ID</th>
-                                        <th>CUSTOMER ID</th>
-                                        <th>DATE</th>
-                                        <th>DELIVERY ADDRESS</th>
-                                        <th>ITEMS</th>
-                                        <th>TOTAL</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {previousOrders.map((order) => (
+                                    {orders.map((order, index) => (
                                         <tr key={order.id}>
+                                            <td>{index + 1}</td>
                                             <td>{order.order_code}</td>
                                             <td>{order.customer}</td>
                                             <td>{new Date(order.created_at).toLocaleDateString('en-IN')}</td>
@@ -129,7 +78,7 @@ const Orders = () => {
                                             <td>
                                                 {(order.items || []).map((item) => (
                                                     <div key={item.id}>
-                                                        {item.product_name} x {item.quantity} = Rs. {Number(item.line_total || 0).toFixed(2)}
+                                                        {item.product_name} x {item.quantity} (Rs. {Number(item.line_total || 0).toFixed(2)})
                                                     </div>
                                                 ))}
                                             </td>
@@ -139,9 +88,9 @@ const Orders = () => {
                                 </tbody>
                             </table>
                         </div>
-                    )}
-                    <div className="mt-2"><strong>Previous orders total: Rs. {totalPrevious.toFixed(2)}</strong></div>
-                </div>
+                        <div className="mt-2"><strong>Grand total: Rs. {grandTotal.toFixed(2)}</strong></div>
+                    </>
+                )}
             </div>
         </div>
     );
